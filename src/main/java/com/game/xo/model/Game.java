@@ -10,7 +10,6 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Transient;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -28,14 +27,12 @@ public class Game {
     @Id
     private String gameId;
 
-    // @ManyToOne
-    // @JoinColumn(name = "player1_id")
-    @Transient
+    @ManyToOne
+    @JoinColumn
     private Player player1;
 
-    // @ManyToOne
-    // @JoinColumn(name = "player2_id")
-    @Transient
+    @ManyToOne
+    @JoinColumn
     private Player player2;
 
     @Enumerated(EnumType.ORDINAL)

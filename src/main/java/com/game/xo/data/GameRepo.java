@@ -25,6 +25,23 @@ public class GameRepo {
 
     public void saveGame(Game game) {
         gameReposytory.save(game);
-    }   
+    }
+
+    public boolean containsGame(String gameId) {
+        return gameReposytory.existsById(gameId);
+    }
+
+    public Game getGame(String gameId) {
+        return gameReposytory.findById(gameId).get();
+    }
+
+    public void deleteGame(String gameId) {
+        gameReposytory.deleteById(gameId);
+    }
+
+    public void updateGame(Game game) {
+        deleteGame(game.getGameId());
+        saveGame(game);
+    }
 
 }
