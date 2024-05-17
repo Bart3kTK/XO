@@ -1,22 +1,15 @@
 package com.game.xo.data;
-
-import org.springframework.beans.factory.annotation.Autowired;
-
+import org.springframework.stereotype.Component;
 import com.game.xo.interfaces.IGameReposytory;
 import com.game.xo.model.Game;
 
+@Component
 public class GameRepo {
 
-    @Autowired
-    private static IGameReposytory gameReposytory;
+    private final IGameReposytory gameReposytory;
 
-    private static GameRepo instance;
-
-    public static synchronized GameRepo getInstance() {
-        if (instance == null) {
-            instance = new GameRepo();
-        }
-        return instance;
+    public GameRepo(IGameReposytory gameReposytory) {
+        this.gameReposytory = gameReposytory;
     }
 
     public Iterable<Game> getGames() {

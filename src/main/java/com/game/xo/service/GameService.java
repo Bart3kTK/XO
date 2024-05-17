@@ -2,15 +2,21 @@ package com.game.xo.service;
 
 import java.util.ArrayList;
 import java.util.UUID;
+import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.game.xo.data.GameRepo;
-import com.game.xo.errors.IllegalGameExeption;
-import com.game.xo.errors.IllegalParmExeption;
+import com.game.xo.errors.IllegalGameException;
+import com.game.xo.errors.IllegalParmException;
+import com.game.xo.errors.NotFoundException;
+
 import com.game.xo.model.Game;
+import com.game.xo.model.GamePlay;
 import com.game.xo.model.GameStatus;
 import com.game.xo.model.Player;
+import com.game.xo.model.XOEnum;
 
 import lombok.AllArgsConstructor;
 
@@ -18,37 +24,90 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class GameService {
 
+    @Autowired
+    GameRepo gameRepo;
+
     public Game createGame(Player player1) {
         Game game = new Game();
         game.setGameBoard(new ArrayList<>());
         game.setGameId(UUID.randomUUID().toString());
         game.setPlayer1(player1);
         game.setStatus(GameStatus.WAITING_FOR_PLAYER);
-        GameRepo.getInstance().saveGame(game);
+        gameRepo.saveGame(game);
         return game;
 
     }   
 
-    public Game joinGame(Player player2, String gameId) throws IllegalParmExeption, IllegalGameExeption
+    public Game joinGame(Player player2, String gameId) throws IllegalParmException, IllegalGameException
     {
-        if(!GameRepo.getInstance().containsGame(gameId))
+        if(!gameRepo.containsGame(gameId))
         {
-            throw new IllegalParmExeption("Game not found");
+            throw new IllegalParmException("Game not found");
         }
 
-        Game game = GameRepo.getInstance().getGame(gameId);
+        Game game = gameRepo.getGame(gameId);
 
         if(game.getPlayer2() != null)
         {
-            throw new IllegalGameExeption("Game is full");
+            throw new IllegalGameException("Game is full");
         }
 
         game.setPlayer2(player2);
         game.setStatus(GameStatus.IN_PROGRESS);
-        GameRepo.getInstance().updateGame(game);
+        gameRepo.updateGame(game);
 
         return game;
+    }
+
+    public Game playGame(GamePlay gamePlay) throws NotFoundException, IllegalGameException
+    {
+        if(!gameRepo.containsGame(gamePlay.getGameId()))
+        {
+            throw new NotFoundException("Game not found");
+        }
+
+        Game game = gameRepo.getGame(gamePlay.getGameId());
+
+        if(game.getStatus() == GameStatus.FINISHED)
+        {
+            throw new IllegalGameException("Game is finished");
+        }
+
+        List<Integer> gameBoard = game.getGameBoard();
+        gameBoard.set(gamePlay.getX() + gamePlay.getY() * 3, gamePlay.getType().ordinal());
+        game.setGameBoard(gameBoard);
+        checkWinner(gameBoard, XOEnum.X);
+        checkWinner(gameBoard, XOEnum.O);
+
+        gameRepo.updateGame(game);
+        return game;
         
+    }
+
+    private boolean checkWinner(List<Integer> board, XOEnum en)
+    {
+        List<List<Integer>> winCombos = List.of(
+            List.of(0, 1, 2),
+            List.of(3, 4, 5),
+            List.of(6, 7, 8),
+            List.of(0, 3, 6),
+            List.of(1, 4, 7),
+            List.of(2, 5, 8),
+            List.of(0, 4, 8),
+            List.of(2, 4, 6)
+        );
+
+        for(List<Integer> combo : winCombos)
+        {
+            if( board.get(combo.get(0)) == en.ordinal() && 
+                board.get(combo.get(1)) == en.ordinal() && 
+                board.get(combo.get(2)) == en.ordinal())
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
     
 }

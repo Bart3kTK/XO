@@ -1,10 +1,9 @@
 package com.game.xo.errors;
 
-public class IllegalGameExeption extends Exception{
-
+public class IllegalParmException extends Exception{
     private final String message;
 
-    public IllegalGameExeption(String message) {
+    public IllegalParmException(String message) {
         this.message = message;
     }
 
@@ -12,5 +11,4 @@ public class IllegalGameExeption extends Exception{
     public String getMessage() {
         return message;
     }
-    
 }
