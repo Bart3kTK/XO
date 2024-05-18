@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.game.xo.data.GameRepo;
+import com.game.xo.data.PlayerRepo;
 import com.game.xo.errors.IllegalGameException;
 import com.game.xo.errors.IllegalParmException;
 import com.game.xo.errors.NotFoundException;
@@ -24,12 +25,22 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class GameService {
 
-    @Autowired
     GameRepo gameRepo;
+    PlayerRepo playerRepo;
 
     public Game createGame(Player player1) {
+        if (player1 == null) {
+            throw new IllegalArgumentException("Player cannot be null");
+        }
+
+        if(!playerRepo.containsPlayer(player1.getId()))
+        {
+            playerRepo.addPlayer(player1);
+        }
+
         Game game = new Game();
-        game.setGameBoard(new ArrayList<>());
+        List<Integer> gameBoard = List.of(-1, -1, -1, -1, -1, -1, -1, -1, -1);
+        game.setGameBoard(gameBoard);
         game.setGameId(UUID.randomUUID().toString());
         game.setPlayer1(player1);
         game.setStatus(GameStatus.WAITING_FOR_PLAYER);
@@ -50,6 +61,12 @@ public class GameService {
         if(game.getPlayer2() != null)
         {
             throw new IllegalGameException("Game is full");
+        }
+
+
+        if(!playerRepo.containsPlayer(player2.getId()))
+        {
+            playerRepo.addPlayer(player2);
         }
 
         game.setPlayer2(player2);
