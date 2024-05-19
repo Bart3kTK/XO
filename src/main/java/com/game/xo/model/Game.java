@@ -38,14 +38,30 @@ public class Game {
     @Enumerated(EnumType.ORDINAL)
     private GameStatus status;
 
-    @ElementCollection
-    @CollectionTable(name = "game_board", joinColumns = @JoinColumn(name = "game_id"))
-    @Column(name = "cell_value")
-    private List<Integer> gameBoard;
+    private String gameBoard;
 
     @Enumerated(EnumType.ORDINAL)
     private XOEnum winner;
 
 
+    public int[] getGameBoard() {
+        String[] board = gameBoard.split(",");
+        int[] result = new int[9];
+        for (int i = 0; i < 9; i++) {
+            result[i] = Integer.parseInt(board[i]);
+        }
+        return result;
+    }
+
+    public void setGameBoard(int[] gameBoard) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 9; i++) {
+            sb.append(gameBoard[i]);
+            if (i < 8) {
+                sb.append(",");
+            }
+        }
+        this.gameBoard = sb.toString();
+    }
     
 }

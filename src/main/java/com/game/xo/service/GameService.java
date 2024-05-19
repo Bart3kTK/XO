@@ -39,7 +39,7 @@ public class GameService {
         }
 
         Game game = new Game();
-        List<Integer> gameBoard = List.of(-1, -1, -1, -1, -1, -1, -1, -1, -1);
+        int[] gameBoard = {-1, -1, -1, -1, -1, -1, -1, -1, -1};
         game.setGameBoard(gameBoard);
         game.setGameId(UUID.randomUUID().toString());
         game.setPlayer1(player1);
@@ -90,18 +90,44 @@ public class GameService {
             throw new IllegalGameException("Game is finished");
         }
 
-        List<Integer> gameBoard = game.getGameBoard();
-        gameBoard.set(gamePlay.getX() + gamePlay.getY() * 3, gamePlay.getType().ordinal());
-        game.setGameBoard(gameBoard);
-        checkWinner(gameBoard, XOEnum.X);
-        checkWinner(gameBoard, XOEnum.O);
+        int[] board = game.getGameBoard();
+
+        if (board[gamePlay.getX() + gamePlay.getY() * 3] != -1) {
+            throw new IllegalGameException("Cell is already taken");
+        }
+        board[gamePlay.getX() + gamePlay.getY() * 3] = gamePlay.getType().ordinal();
+        game.setGameBoard(board);
+        boolean xWin = checkWinner(board, XOEnum.X);
+        boolean oWin = checkWinner(board, XOEnum.O);
+
+        if (xWin) {
+            game.setWinner(XOEnum.X);
+            game.setStatus(GameStatus.FINISHED);
+        } 
+        else if (oWin) {
+            game.setWinner(XOEnum.O);
+            game.setStatus(GameStatus.FINISHED);
+        } 
+        else {
+            boolean isFull = true;
+            for (int i = 0; i < 9; i++) {
+                if (board[i] == -1) {
+                    isFull = false;
+                    break;
+                }
+            }
+
+            if (isFull) {
+                game.setStatus(GameStatus.FINISHED);
+            }
+        }
 
         gameRepo.updateGame(game);
         return game;
         
     }
 
-    private boolean checkWinner(List<Integer> board, XOEnum en)
+    private boolean checkWinner(int[] board, XOEnum en)
     {
         List<List<Integer>> winCombos = List.of(
             List.of(0, 1, 2),
@@ -116,9 +142,9 @@ public class GameService {
 
         for(List<Integer> combo : winCombos)
         {
-            if( board.get(combo.get(0)) == en.ordinal() && 
-                board.get(combo.get(1)) == en.ordinal() && 
-                board.get(combo.get(2)) == en.ordinal())
+            if( board[combo.get(0)] == en.ordinal() && 
+                board[combo.get(1)] == en.ordinal() && 
+                board[combo.get(2)] == en.ordinal())
             {
                 return true;
             }

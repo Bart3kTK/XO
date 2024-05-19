@@ -45,10 +45,6 @@ public class Controller {
         this.gameRepo = gameRepo;
         this.gameService = gameService;
         System.out.println("Controller created!");
-        playerRepo.addPlayer(new Player("Player1", "elelo"));
-        playerRepo.addPlayer(new Player("Player2", "elelo"));
-        gameRepo.saveGame(new Game("Game1", playerRepo.getPlayers().iterator().next(), playerRepo.getPlayers().iterator().next(), GameStatus.IN_PROGRESS,List.of(1,2,3,4,5) , XOEnum.X));
-
 
     }
     
